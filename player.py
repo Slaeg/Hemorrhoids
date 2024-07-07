@@ -37,8 +37,9 @@ class Player(pygame.sprite.Sprite):
 
     def thrust(self):
         radians = math.radians(self.angle)
-        self.velocity.x += math.sin(radians)
-        self.velocity.y -= math.cos(radians)
+        self.velocity.x += 0.5 * math.sin(radians)  # Reduced thrust factor
+        self.velocity.y -= 0.5 * math.cos(radians)  # Reduced thrust factor
+
 
     def fire(self):
         bullet = Bullet(self.rect.center, self.angle)
