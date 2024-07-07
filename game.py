@@ -7,13 +7,15 @@ class Game:
     def __init__(self, screen):
         self.screen = screen
         self.player = Player()
+        self.level = 1
+        self.num_asteroids = 4  # Start with 4 big asteroids
         self.asteroids = pygame.sprite.Group()
         self.all_sprites = pygame.sprite.Group(self.player)
         self.spawn_asteroids()
     
     def spawn_asteroids(self):
-        for _ in range(5):
-            asteroid = Asteroid()
+        for _ in range(self.num_asteroids):
+            asteroid = Asteroid(size=60)
             self.asteroids.add(asteroid)
             self.all_sprites.add(asteroid)
     
@@ -31,12 +33,16 @@ class Game:
         hits = pygame.sprite.groupcollide(self.player.bullets, self.asteroids, True, True)
         if hits:
             for hit in hits:
-                # Split the asteroid into smaller ones
                 for asteroid in hits[hit]:
                     new_asteroids = asteroid.split()
                     self.asteroids.add(new_asteroids)
                     self.all_sprites.add(new_asteroids)
         
+        if not self.asteroids:  # Check if all asteroids are cleared
+            self.level += 1
+            self.num_asteroids += 1  # Increase the number of asteroids for the next level
+            self.spawn_asteroids()
+
         if pygame.sprite.spritecollideany(self.player, self.asteroids):
             # Handle player collision
             pass
