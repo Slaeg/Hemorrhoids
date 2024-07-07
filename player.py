@@ -12,7 +12,9 @@ class Player(pygame.sprite.Sprite):
         self.rotation_speed = 5
         self.velocity = pygame.math.Vector2(0, 0)
         self.bullets = pygame.sprite.Group()
+        self.lives = float('inf')  # Infinite lives for development
     
+
     def create_player_image(self):
         image = pygame.Surface((25, 25), pygame.SRCALPHA)  # Changed from (50, 50) to (25, 25)
         pygame.draw.polygon(image, (0, 255, 0), [(12.5, 0), (0, 25), (25, 25)])  # Adjusted coordinates to match the new size
@@ -21,9 +23,9 @@ class Player(pygame.sprite.Sprite):
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
-            self.angle += self.rotation_speed
+            self.angle -= self.rotation_speed  # Changed from += to -=
         if keys[pygame.K_RIGHT]:
-            self.angle -= self.rotation_speed
+            self.angle += self.rotation_speed  # Changed from -= to +=
         if keys[pygame.K_UP]:
             self.thrust()
         
