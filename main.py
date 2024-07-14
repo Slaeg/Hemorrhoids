@@ -1,9 +1,15 @@
 import pygame
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, FPS
 from game import Game
+from utils import play_music
 
 def main():
     pygame.init()
+    pygame.mixer.init()
+    
+    # Play background music
+    play_music("assets/sounds/music.mp3")
+    
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     pygame.display.set_caption("Asteroids Clone")
     clock = pygame.time.Clock()

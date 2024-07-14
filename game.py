@@ -1,6 +1,7 @@
 import pygame
 from player import Player
 from asteroid import Asteroid
+from explosion import Explosion
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE
 
 class Game:
@@ -11,6 +12,7 @@ class Game:
         self.num_asteroids = 4  # Start with 4 big asteroids
         self.asteroids = pygame.sprite.Group()
         self.all_sprites = pygame.sprite.Group(self.player)
+        self.explosions = pygame.sprite.Group()
         self.spawn_asteroids()
         
         self.score = 0
@@ -26,12 +28,14 @@ class Game:
     def update(self):
         self.all_sprites.update()
         self.player.bullets.update()
+        self.explosions.update()
         self.handle_collisions()
     
     def draw(self):
         self.screen.fill(BLACK)
         self.all_sprites.draw(self.screen)
         self.player.bullets.draw(self.screen)
+        self.explosions.draw(self.screen)
         
         # Display the score, highscore, and lives
         score_text = self.font.render(f"Score: {self.score}", True, WHITE)
@@ -64,9 +68,14 @@ class Game:
             self.spawn_asteroids()
         
         if pygame.sprite.spritecollideany(self.player, self.asteroids):
-            # Handle player collision (reset player position)
+            # Handle player collision (reset player position and play explosion)
             if self.score > self.highscore:
                 self.highscore = self.score
+            
+            explosion = Explosion(self.player.rect.center)
+            self.explosions.add(explosion)
+            self.all_sprites.add(explosion)
+            
             self.score = 0
             self.player.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
             self.player.velocity = pygame.math.Vector2(0, 0)
