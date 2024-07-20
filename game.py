@@ -32,15 +32,15 @@ class Game:
         self.handle_collisions()
     
     def draw(self):
-        self.screen.fill(BLACK)
+        self.screen.fill(WHITE)  # Change background to white
         self.all_sprites.draw(self.screen)
         self.player.bullets.draw(self.screen)
         self.explosions.draw(self.screen)
         
         # Display the score, highscore, and lives
-        score_text = self.font.render(f"Score: {self.score}", True, WHITE)
-        highscore_text = self.font.render(f"Highscore: {self.highscore}", True, WHITE)
-        lives_text = self.font.render(f"Lives: {self.player.lives}", True, WHITE)
+        score_text = self.font.render(f"Score: {self.score}", True, BLACK)  # Change text color to black
+        highscore_text = self.font.render(f"Highscore: {self.highscore}", True, BLACK)  # Change text color to black
+        lives_text = self.font.render(f"Lives: {self.player.lives}", True, BLACK)  # Change text color to black
         self.screen.blit(score_text, (SCREEN_WIDTH - 150, 10))
         self.screen.blit(highscore_text, (10, 10))
         self.screen.blit(lives_text, (10, 50))

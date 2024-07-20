@@ -54,7 +54,7 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, position, angle):
         super().__init__()
         self.image = pygame.Surface((5, 5))
-        self.image.fill((255, 255, 0))
+        self.image.fill((0, 0, 0))  # Change bullet color to black
         self.rect = self.image.get_rect(center=position)
         self.speed = 10
         radians = math.radians(angle)
@@ -64,3 +64,4 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.center += self.velocity
         if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH or self.rect.bottom < 0 or self.rect.top > SCREEN_HEIGHT:
             self.kill()
+
