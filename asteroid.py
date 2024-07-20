@@ -7,10 +7,17 @@ class Asteroid(pygame.sprite.Sprite):
         super().__init__()
         self.size = size
         self.split_count = split_count
-        self.image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
-        pygame.draw.circle(self.image, (255, 0, 0), (self.size // 2, self.size // 2), self.size // 2)
-        self.rect = self.image.get_rect()
         
+        if self.size == 60:
+            self.image = pygame.image.load("assets/images/asteroid_large.png").convert_alpha()
+        elif self.size == 30:
+            self.image = pygame.image.load("assets/images/asteroid_medium.png").convert_alpha()
+        elif self.size == 15:
+            self.image = pygame.image.load("assets/images/asteroid_small.png").convert_alpha()
+
+        self.image = pygame.transform.scale(self.image, (self.size, self.size))
+        self.rect = self.image.get_rect()
+
         if x is None and y is None:
             self.rect.x = random.randint(0, SCREEN_WIDTH - self.rect.width)
             self.rect.y = random.randint(0, SCREEN_HEIGHT - self.rect.height)
@@ -18,9 +25,9 @@ class Asteroid(pygame.sprite.Sprite):
             self.rect.x = x
             self.rect.y = y
         
-        self.speed = speed if speed is not None else random.uniform(0.5, 1.5)  # Reduced speed range
+        self.speed = speed if speed is not None else random.uniform(0.5, 1.5)
         self.velocity = pygame.math.Vector2(random.choice([-1, 1]) * self.speed, random.choice([-1, 1]) * self.speed)
-
+    
     def update(self):
         self.rect.x += self.velocity.x
         self.rect.y += self.velocity.y
