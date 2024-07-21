@@ -17,7 +17,7 @@ class Game:
         
         self.score = 0
         self.highscore = 0
-        self.font = pygame.font.Font(None, 36)
+        self.font = pygame.font.Font("assets/fonts/Layn.ttf", 16)  # Load custom font
     
     def spawn_asteroids(self):
         for _ in range(self.num_asteroids):
