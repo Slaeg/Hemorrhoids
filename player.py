@@ -1,13 +1,15 @@
 import pygame
 import math
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT
+from bullet import Bullet
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.original_image = pygame.image.load("assets/images/player.png").convert_alpha()
-        self.image = pygame.transform.scale(self.original_image, (25, 25))  # Scale to match the existing player size
+        self.image = pygame.transform.scale(self.original_image, (25, 25))
         self.rect = self.image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        self.mask = pygame.mask.from_surface(self.image)
         self.angle = 0
         self.rotation_speed = 5
         self.velocity = pygame.math.Vector2(0, 0)
@@ -28,6 +30,7 @@ class Player(pygame.sprite.Sprite):
 
         self.image = pygame.transform.rotate(self.original_image, -self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
+        self.mask = pygame.mask.from_surface(self.image)
         
         self.wrap_around_screen()
 
@@ -49,19 +52,3 @@ class Player(pygame.sprite.Sprite):
             self.rect.top = SCREEN_HEIGHT
         elif self.rect.top > SCREEN_HEIGHT:
             self.rect.bottom = 0
-
-class Bullet(pygame.sprite.Sprite):
-    def __init__(self, position, angle):
-        super().__init__()
-        self.image = pygame.Surface((5, 5))
-        self.image.fill((0, 0, 0))  # Change bullet color to black
-        self.rect = self.image.get_rect(center=position)
-        self.speed = 10
-        radians = math.radians(angle)
-        self.velocity = pygame.math.Vector2(math.sin(radians), -math.cos(radians)) * self.speed
-    
-    def update(self):
-        self.rect.center += self.velocity
-        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH or self.rect.bottom < 0 or self.rect.top > SCREEN_HEIGHT:
-            self.kill()
-

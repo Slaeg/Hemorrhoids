@@ -17,7 +17,7 @@ class Game:
         
         self.score = 0
         self.highscore = 0
-        self.font = pygame.font.Font("assets/fonts/Layn.ttf", 16)  # Load custom font
+        self.font = pygame.font.Font("assets/fonts/Layn.ttf", 14)  # Load custom font
     
     def spawn_asteroids(self):
         for _ in range(self.num_asteroids):
@@ -46,7 +46,8 @@ class Game:
         self.screen.blit(lives_text, (10, 50))
     
     def handle_collisions(self):
-        hits = pygame.sprite.groupcollide(self.player.bullets, self.asteroids, True, True)
+        # Use masks for precise collision detection
+        hits = pygame.sprite.groupcollide(self.player.bullets, self.asteroids, True, True, pygame.sprite.collide_mask)
         if hits:
             for hit in hits:
                 for asteroid in hits[hit]:
@@ -67,7 +68,8 @@ class Game:
             self.num_asteroids += 1  # Increase the number of asteroids for the next level
             self.spawn_asteroids()
         
-        if pygame.sprite.spritecollideany(self.player, self.asteroids):
+        # Use masks for precise collision detection between player and asteroids
+        if pygame.sprite.spritecollide(self.player, self.asteroids, False, pygame.sprite.collide_mask):
             # Handle player collision (reset player position and play explosion)
             if self.score > self.highscore:
                 self.highscore = self.score
