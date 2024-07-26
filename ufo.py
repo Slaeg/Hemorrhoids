@@ -2,7 +2,7 @@ import pygame
 import random
 import math
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT
-from bullet import Bullet  # Ensure Bullet is imported
+from ufo_bullet import UFOBullet  # Ensure UFOBullet is imported
 
 class UFO(pygame.sprite.Sprite):
     BIG_SIZE = 40
@@ -38,12 +38,10 @@ class UFO(pygame.sprite.Sprite):
         if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
             self.kill()
     
-    def fire(self):
+    def fire(self, player_pos):
         if random.random() < self.fire_probability:
-            return Bullet(self.rect.center, self.get_angle_to_player())
+            return UFOBullet(self.rect.center, self.get_angle_to_player(player_pos))
         return None
 
-    def get_angle_to_player(self):
-        # This method needs the player's position, so you might need to pass it from the game class
-        player_pos = pygame.Vector2(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)  # Placeholder
-        return (player_pos - pygame.Vector2(self.rect.center)).angle_to(pygame.Vector2(1, 0))
+    def get_angle_to_player(self, player_pos):
+        return (pygame.Vector2(player_pos) - pygame.Vector2(self.rect.center)).angle_to(pygame.Vector2(1, 0))

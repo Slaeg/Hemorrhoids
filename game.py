@@ -4,6 +4,7 @@ from player import Player
 from asteroid import Asteroid
 from explosion import Explosion
 from ufo import UFO
+from ufo_bullet import UFOBullet
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE
 
 class Game:
@@ -14,6 +15,7 @@ class Game:
         self.num_asteroids = 4  # Start with 4 big asteroids
         self.asteroids = pygame.sprite.Group()
         self.ufos = pygame.sprite.Group()
+        self.ufo_bullets = pygame.sprite.Group()  # Add group for UFO bullets
         self.all_sprites = pygame.sprite.Group(self.player)
         self.explosions = pygame.sprite.Group()
         self.spawn_asteroids()
@@ -41,6 +43,7 @@ class Game:
     def update(self):
         self.all_sprites.update()
         self.player.bullets.update()
+        self.ufo_bullets.update()
         self.explosions.update()
         self.ufos.update()
         self.handle_collisions()
@@ -55,6 +58,7 @@ class Game:
         self.screen.fill(WHITE)  # Change background to white
         self.all_sprites.draw(self.screen)
         self.player.bullets.draw(self.screen)
+        self.ufo_bullets.draw(self.screen)
         self.explosions.draw(self.screen)
         
         # Display the score, highscore, and lives
@@ -90,6 +94,19 @@ class Game:
                 self.explosions.add(explosion)
                 self.all_sprites.add(explosion)
         
+        # Check collisions between UFO bullets and player
+        if pygame.sprite.spritecollideany(self.player, self.ufo_bullets, pygame.sprite.collide_mask):
+            if self.score > self.highscore:
+                self.highscore = self.score
+            
+            explosion = Explosion(self.player.rect.center)
+            self.explosions.add(explosion)
+            self.all_sprites.add(explosion)
+            
+            self.score = 0
+            self.player.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+            self.player.velocity = pygame.math.Vector2(0, 0)
+
         if not self.asteroids:  # Check if all asteroids are cleared
             self.level += 1
             self.num_asteroids += 1  # Increase the number of asteroids for the next level
@@ -111,7 +128,7 @@ class Game:
 
     def handle_ufo_fire(self):
         for ufo in self.ufos:
-            bullet = ufo.fire()
+            bullet = ufo.fire(self.player.rect.center)
             if bullet:
                 self.all_sprites.add(bullet)
-                self.player.bullets.add(bullet)
+                self.ufo_bullets.add(bullet)
