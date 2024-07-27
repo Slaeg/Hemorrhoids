@@ -34,11 +34,12 @@ class Game:
             self.all_sprites.add(asteroid)
 
     def spawn_ufo(self):
-        size = random.choice([UFO.BIG_SIZE, UFO.SMALL_SIZE])
-        ufo = UFO(size)
-        self.ufos.add(ufo)
-        self.all_sprites.add(ufo)
-        print(f"Spawned UFO of size {size}")  # Debugging statement
+        if len(self.ufos) == 0:  # Ensure only one UFO at a time
+            size = UFO.BIG_SIZE if random.random() < 0.7 else UFO.SMALL_SIZE  # 70% chance for big UFO
+            ufo = UFO(size)
+            self.ufos.add(ufo)
+            self.all_sprites.add(ufo)
+            print(f"Spawned UFO of size {size}")  # Debugging statement
     
     def update(self):
         self.all_sprites.update()
@@ -50,7 +51,7 @@ class Game:
         self.handle_ufo_fire()
         
         self.ufo_timer += 1
-        if self.ufo_timer >= self.ufo_interval:
+        if self.ufo_timer >= self.ufo_interval and len(self.ufos) == 0:
             self.spawn_ufo()
             self.ufo_timer = 0
     
@@ -93,6 +94,7 @@ class Game:
                 explosion = Explosion(ufo.rect.center)
                 self.explosions.add(explosion)
                 self.all_sprites.add(explosion)
+                self.ufo_timer = 0  # Reset the timer to spawn a new UFO after the current one is destroyed
         
         # Check collisions between UFO bullets and player
         if pygame.sprite.spritecollideany(self.player, self.ufo_bullets, pygame.sprite.collide_mask):

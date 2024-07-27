@@ -30,13 +30,36 @@ class UFO(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.y = random.randint(0, SCREEN_HEIGHT - self.rect.height)
-        self.rect.x = -self.rect.width if random.choice([True, False]) else SCREEN_WIDTH
-        self.velocity = pygame.math.Vector2(self.speed if self.rect.x == -self.rect.width else -self.speed, 0)
+        
+        # Adjust the x position to spawn within the screen
+        self.start_side = random.choice(['left', 'right'])
+        self.rect.x = -self.rect.width if self.start_side == 'left' else SCREEN_WIDTH
+        self.velocity = pygame.math.Vector2(self.speed if self.start_side == 'left' else -self.speed, 0)
+        
+        self.direction_changed = False  # To track if direction has changed once
+        print(f"UFO initialized at position {self.rect.topleft}")  # Debugging statement
     
     def update(self):
         self.rect.x += self.velocity.x
-        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
-            self.kill()
+        if not self.direction_changed and ((self.start_side == 'left' and self.rect.centerx > SCREEN_WIDTH // 2) or (self.start_side == 'right' and self.rect.centerx < SCREEN_WIDTH // 2)):
+            self.velocity.y = random.choice([-1, 1]) * self.speed
+            self.direction_changed = True
+        if self.direction_changed and ((self.start_side == 'left' and self.rect.centerx > SCREEN_WIDTH) or (self.start_side == 'right' and self.rect.centerx < 0)):
+            self.velocity.y = 0
+
+        # Screen wrapping logic
+        if self.rect.right < 0:
+            self.rect.left = SCREEN_WIDTH
+        elif self.rect.left > SCREEN_WIDTH:
+            self.rect.right = 0
+
+        self.rect.y += self.velocity.y  # Add vertical movement
+        if self.rect.top < 0:
+            self.rect.bottom = SCREEN_HEIGHT
+        elif self.rect.bottom > SCREEN_HEIGHT:
+            self.rect.top = 0
+
+        print(f"UFO updated position to {self.rect.topleft}")  # Debugging statement
     
     def fire(self, player_pos):
         if random.random() < self.fire_probability:
