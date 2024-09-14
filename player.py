@@ -20,6 +20,8 @@ class Player(pygame.sprite.Sprite):
         self.invulnerable = False
         self.invulnerable_timer = 0
         self.invulnerable_duration = 180  # 3 seconds at 60 FPS
+        self.flash_interval = 5  # Flash every 1/4 second at 60 FPS
+        self.visible = True
 
     def update(self):
         if self.respawn_timer > 0:
@@ -30,6 +32,11 @@ class Player(pygame.sprite.Sprite):
             self.invulnerable_timer -= 1
             if self.invulnerable_timer <= 0:
                 self.invulnerable = False
+                self.visible = True
+            else:
+                # Toggle visibility every flash_interval frames
+                if self.invulnerable_timer % self.flash_interval == 0:
+                    self.visible = not self.visible
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
@@ -61,6 +68,7 @@ class Player(pygame.sprite.Sprite):
         self.velocity = pygame.math.Vector2(0, 0)
         self.invulnerable = True
         self.invulnerable_timer = self.invulnerable_duration
+        self.visible = True
 
     def thrust(self):
         radians = math.radians(self.angle)
@@ -68,7 +76,6 @@ class Player(pygame.sprite.Sprite):
         self.velocity.y -= 0.5 * math.cos(radians)
 
     def fire(self):
-        print("Player fire method called")  # Debug print
         bullet = Bullet(self.rect.center, self.angle)
         self.bullets.add(bullet)
 
@@ -81,3 +88,7 @@ class Player(pygame.sprite.Sprite):
             self.rect.top = SCREEN_HEIGHT
         elif self.rect.top > SCREEN_HEIGHT:
             self.rect.bottom = 0
+
+    def draw(self, surface):
+        if self.visible:
+            surface.blit(self.image, self.rect)

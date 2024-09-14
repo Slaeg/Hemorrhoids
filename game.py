@@ -92,7 +92,10 @@ class Game:
         if self.state == "TITLE":
             self.draw_title_screen()
         elif self.state == "PLAYING":
-            self.all_sprites.draw(self.screen)
+            for sprite in self.all_sprites:
+                if sprite != self.player:
+                    self.screen.blit(sprite.image, sprite.rect)
+            self.player.draw(self.screen)  # Draw player separately
             self.player.bullets.draw(self.screen)
             self.ufo_bullets.draw(self.screen)
             self.explosions.draw(self.screen)
