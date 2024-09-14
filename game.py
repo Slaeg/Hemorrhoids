@@ -21,6 +21,7 @@ class Game:
             'shoot': load_sound('assets/sounds/shoot.wav'),
             'explosion': load_sound('assets/sounds/explosion.wav'),
             'ufo': load_sound('assets/sounds/ufo.wav'),
+            'ufo_shoot': load_sound('assets/sounds/ufo_shoot.wav'),
         }
         self.initialize_game()
         self.state = "TITLE"  # New game state
@@ -245,7 +246,7 @@ class Game:
     def spawn_ufo(self):
         if len(self.ufos) == 0:  # Ensure only one UFO at a time
             size = UFO.BIG_SIZE if random.random() < 0.7 else UFO.SMALL_SIZE  # 70% chance for big UFO
-            ufo = UFO(size)
+            ufo = UFO(size, self.sounds['ufo_shoot'])
             self.ufos.add(ufo)
             self.all_sprites.add(ufo)
             play_sound(self.sounds['ufo'])

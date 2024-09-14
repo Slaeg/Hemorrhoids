@@ -2,7 +2,7 @@ import pygame
 import random
 import math
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT
-from ufo_bullet import UFOBullet  # Ensure UFOBullet is imported
+from ufo_bullet import UFOBullet
 
 class UFO(pygame.sprite.Sprite):
     BIG_SIZE = 40
@@ -12,7 +12,7 @@ class UFO(pygame.sprite.Sprite):
     BIG_POINTS = 500
     SMALL_POINTS = 1000
 
-    def __init__(self, size):
+    def __init__(self, size, shoot_sound):
         super().__init__()
         self.size = size
         if self.size == self.BIG_SIZE:
@@ -31,13 +31,12 @@ class UFO(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.y = random.randint(0, SCREEN_HEIGHT - self.rect.height)
         
-        # Adjust the x position to spawn within the screen
         self.start_side = random.choice(['left', 'right'])
         self.rect.x = -self.rect.width if self.start_side == 'left' else SCREEN_WIDTH
         self.velocity = pygame.math.Vector2(self.speed if self.start_side == 'left' else -self.speed, 0)
         
-        self.direction_changed = False  # To track if direction has changed once
-        print(f"UFO initialized at position {self.rect.topleft}")  # Debugging statement
+        self.direction_changed = False
+        self.shoot_sound = shoot_sound
     
     def update(self):
         self.rect.x += self.velocity.x
@@ -59,10 +58,10 @@ class UFO(pygame.sprite.Sprite):
         elif self.rect.bottom > SCREEN_HEIGHT:
             self.rect.top = 0
 
-        print(f"UFO updated position to {self.rect.topleft}")  # Debugging statement
-    
     def fire(self, player_pos):
         if random.random() < self.fire_probability:
+            if self.shoot_sound:
+                self.shoot_sound.play()
             return UFOBullet(self.rect.center, self.get_angle_to_player(player_pos))
         return None
 
