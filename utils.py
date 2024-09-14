@@ -8,7 +8,17 @@ def stop_music():
     pygame.mixer.music.stop()
 
 def load_sound(file):
-    return pygame.mixer.Sound(file)
+    try:
+        sound = pygame.mixer.Sound(file)
+        return sound
+    except pygame.error as e:
+        print(f"Unable to load sound file: {file}")
+        print(f"Error: {e}")
+        return None
 
 def play_sound(sound):
-    sound.play()
+    print(f"play_sound called with sound object: {sound}")  # Debug print
+    if sound:
+        sound.play()
+    else:
+        print("Warning: Attempted to play a sound that wasn't loaded")

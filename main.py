@@ -21,7 +21,7 @@ def main():
                     running = False
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        game.player.fire()
+                        game.player_shoot()  # Call game.player_shoot() instead of game.player.fire()
 
             game.update()
             game.draw()

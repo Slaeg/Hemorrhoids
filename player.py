@@ -14,9 +14,23 @@ class Player(pygame.sprite.Sprite):
         self.rotation_speed = 5
         self.velocity = pygame.math.Vector2(0, 0)
         self.bullets = pygame.sprite.Group()
-        self.lives = float('inf')  # Infinite lives for development
+        self.lives = 3
+        self.respawn_timer = 0
+        self.respawn_delay = 180  # 3 seconds at 60 FPS
+        self.invulnerable = False
+        self.invulnerable_timer = 0
+        self.invulnerable_duration = 180  # 3 seconds at 60 FPS
 
     def update(self):
+        if self.respawn_timer > 0:
+            self.respawn_timer -= 1
+            return
+
+        if self.invulnerable:
+            self.invulnerable_timer -= 1
+            if self.invulnerable_timer <= 0:
+                self.invulnerable = False
+
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.angle -= self.rotation_speed
@@ -34,12 +48,27 @@ class Player(pygame.sprite.Sprite):
         
         self.wrap_around_screen()
 
+    def hit(self):
+        if not self.invulnerable:
+            self.lives -= 1
+            if self.lives > 0:
+                self.respawn()
+            else:
+                self.kill()
+
+    def respawn(self):
+        self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        self.velocity = pygame.math.Vector2(0, 0)
+        self.invulnerable = True
+        self.invulnerable_timer = self.invulnerable_duration
+
     def thrust(self):
         radians = math.radians(self.angle)
         self.velocity.x += 0.5 * math.sin(radians)
         self.velocity.y -= 0.5 * math.cos(radians)
 
     def fire(self):
+        print("Player fire method called")  # Debug print
         bullet = Bullet(self.rect.center, self.angle)
         self.bullets.add(bullet)
 
