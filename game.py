@@ -1,12 +1,12 @@
 import pygame
 import random
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE
+from utils import load_sound, play_sound
 from asteroid import Asteroid
 from explosion import Explosion
 from ufo import UFO
 from ufo_bullet import UFOBullet
 from particle import Particle
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE
-from utils import load_sound, play_sound
 
 class Game:
     instance = None
@@ -15,9 +15,18 @@ class Game:
         if Game.instance is None:
             Game.instance = self
         self.screen = screen
-        from player import Player
+        self.highscore = 0
+        self.font = pygame.font.Font("assets/fonts/Layn.ttf", 16)  # Load custom font
+        self.sounds = {
+            'shoot': load_sound('assets/sounds/shoot.wav'),
+            'explosion': load_sound('assets/sounds/explosion.wav'),
+            'ufo': load_sound('assets/sounds/ufo.wav'),
+        }
+        self.initialize_game()
+
+    def initialize_game(self):
+        from player import Player  # Import Player here to avoid circular import
         self.player = Player()
-        
         self.level = 1
         self.num_asteroids = 4  # Start with 4 big asteroids
         self.asteroids = pygame.sprite.Group()
@@ -29,38 +38,27 @@ class Game:
         self.spawn_asteroids()
         
         self.score = 0
-        self.highscore = 0
-        self.font = pygame.font.Font("assets/fonts/Layn.ttf", 16)  # Load custom font
-
         self.ufo_timer = 0
         self.ufo_interval = 5 * 60  # UFO appears every 5 seconds at 60 FPS
         self.game_over = False
 
-        # Load sounds
-        self.sounds = {
-            'shoot': load_sound('assets/sounds/shoot.wav'),
-            'explosion': load_sound('assets/sounds/explosion.wav'),
-            'ufo': load_sound('assets/sounds/ufo.wav'),
-        }
+    def reset_game(self):
+        print("Resetting game")  # Debug print
+        self.highscore = max(self.score, self.highscore)  # Update highscore before resetting
+        self.initialize_game()
 
-    @classmethod
-    def get_instance(cls):
-        return cls.instance
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.player_shoot()
+                elif event.key == pygame.K_r and self.game_over:
+                    print("R key pressed, resetting game")  # Debug print
+                    self.reset_game()
+        return True
 
-    def spawn_asteroids(self):
-        for _ in range(self.num_asteroids):
-            asteroid = Asteroid(size=60)
-            self.asteroids.add(asteroid)
-            self.all_sprites.add(asteroid)
-
-    def spawn_ufo(self):
-        if len(self.ufos) == 0:  # Ensure only one UFO at a time
-            size = UFO.BIG_SIZE if random.random() < 0.7 else UFO.SMALL_SIZE  # 70% chance for big UFO
-            ufo = UFO(size)
-            self.ufos.add(ufo)
-            self.all_sprites.add(ufo)
-            play_sound(self.sounds['ufo'])
-    
     def update(self):
         if not self.game_over:
             self.all_sprites.update()
@@ -76,7 +74,7 @@ class Game:
             if self.ufo_timer >= self.ufo_interval and len(self.ufos) == 0:
                 self.spawn_ufo()
                 self.ufo_timer = 0
-    
+
     def draw(self):
         self.screen.fill(WHITE)
         self.all_sprites.draw(self.screen)
@@ -95,24 +93,13 @@ class Game:
         self.screen.blit(score_text, (SCREEN_WIDTH - 150, 10))
         self.screen.blit(highscore_text, (10, 10))
         self.screen.blit(lives_text, (10, 50))
-    
+
     def draw_game_over(self):
         game_over_text = self.font.render("GAME OVER", True, BLACK)
         restart_text = self.font.render("Press R to Restart", True, BLACK)
         self.screen.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
         self.screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
 
-    def handle_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                return False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    self.player_shoot()
-                elif event.key == pygame.K_r and self.game_over:
-                    self.reset_game()
-        return True
-    
     def handle_collisions(self):
         # Player bullets with asteroids
         hits = pygame.sprite.groupcollide(self.player.bullets, self.asteroids, True, True, pygame.sprite.collide_mask)
@@ -164,10 +151,10 @@ class Game:
             if self.score > self.highscore:
                 self.highscore = self.score
             
-            self.score = 0
             if self.player.lives > 0:
                 self.player.respawn()
             else:
+                print("Game over")  # Debug print
                 self.game_over = True
 
     def handle_ufo_fire(self):
@@ -204,10 +191,19 @@ class Game:
             particle = Particle(ufo.rect.center, (255, 0, 0))
             self.particles.add(particle)
 
-    def reset_game(self):
-        self.__init__(self.screen)
-        self.player = Player()
-        self.all_sprites.add(self.player)
+    def spawn_asteroids(self):
+        for _ in range(self.num_asteroids):
+            asteroid = Asteroid(size=60)
+            self.asteroids.add(asteroid)
+            self.all_sprites.add(asteroid)
+
+    def spawn_ufo(self):
+        if len(self.ufos) == 0:  # Ensure only one UFO at a time
+            size = UFO.BIG_SIZE if random.random() < 0.7 else UFO.SMALL_SIZE  # 70% chance for big UFO
+            ufo = UFO(size)
+            self.ufos.add(ufo)
+            self.all_sprites.add(ufo)
+            play_sound(self.sounds['ufo'])
 
     def add_particle(self, particle):
         self.particles.add(particle)

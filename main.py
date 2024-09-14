@@ -16,13 +16,7 @@ def main():
         running = True
 
         while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        game.player_shoot()  # Call game.player_shoot() instead of game.player.fire()
-
+            running = game.handle_events()
             game.update()
             game.draw()
 
