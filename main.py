@@ -10,7 +10,7 @@ def main():
         play_music("assets/sounds/music.mp3")
 
         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("Asteroids Clone")
+        pygame.display.set_caption("Haemorrhoids")
         clock = pygame.time.Clock()
         game = Game(screen)
         running = True
@@ -20,7 +20,6 @@ def main():
             game.update()
             game.draw()
 
-            pygame.display.flip()
             clock.tick(FPS)
     except Exception as e:
         print(f"An error occurred: {e}")
