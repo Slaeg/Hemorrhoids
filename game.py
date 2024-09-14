@@ -52,7 +52,7 @@ class Game:
             if event.type == pygame.QUIT:
                 return False
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_SPACE and not self.game_over:
                     self.player_shoot()
                 elif event.key == pygame.K_r and self.game_over:
                     print("R key pressed, resetting game")  # Debug print
@@ -165,13 +165,16 @@ class Game:
                 self.ufo_bullets.add(bullet)
 
     def player_shoot(self):
-        print("player_shoot method called")  # Debug print
-        if self.sounds['shoot']:
-            print("Attempting to play shoot sound")  # Debug print
-            play_sound(self.sounds['shoot'])
+        if not self.game_over:  # Only allow shooting if the game is not over
+            print("player_shoot method called")  # Debug print
+            if self.sounds['shoot']:
+                print("Attempting to play shoot sound")  # Debug print
+                play_sound(self.sounds['shoot'])
+            else:
+                print("Warning: Shoot sound not loaded")
+            self.player.fire()
         else:
-            print("Warning: Shoot sound not loaded")
-        self.player.fire()
+            print("Cannot shoot when game is over")  # Debug print
 
     def asteroid_explosion(self, asteroid):
         explosion = Explosion(asteroid.rect.center)
