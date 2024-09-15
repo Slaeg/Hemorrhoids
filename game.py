@@ -3,7 +3,6 @@ import random
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE
 from utils import load_sound, play_sound
 from asteroid import Asteroid
-from explosion import Explosion
 from ufo import UFO
 from ufo_bullet import UFOBullet
 from particle import Particle
@@ -37,7 +36,6 @@ class Game:
         self.ufos = pygame.sprite.Group()
         self.ufo_bullets = pygame.sprite.Group()
         self.all_sprites = pygame.sprite.Group(self.player)
-        self.explosions = pygame.sprite.Group()
         self.particles = pygame.sprite.Group()
         self.spawn_asteroids()
         
@@ -74,9 +72,8 @@ class Game:
                 self.all_sprites.update()
                 self.player.bullets.update()
                 self.ufo_bullets.update()
-                self.explosions.update()
-                self.ufos.update()
                 self.particles.update()
+                self.ufos.update()
                 self.handle_collisions()
                 self.handle_ufo_fire()
                 
@@ -99,7 +96,6 @@ class Game:
             self.player.draw(self.screen)  # Draw player separately
             self.player.bullets.draw(self.screen)
             self.ufo_bullets.draw(self.screen)
-            self.explosions.draw(self.screen)
             self.particles.draw(self.screen)
             
             # Display the score, highscore, and lives
@@ -132,10 +128,6 @@ class Game:
         self.screen.blit(controls_text1, controls_rect1)
         self.screen.blit(controls_text2, controls_rect2)
         self.screen.blit(controls_text3, controls_rect3)
-
-    def reset_game(self):
-        self.initialize_game()
-        self.state = "PLAYING"
 
     def draw_game_over(self):
         game_over_text = self.font.render("GAME OVER", True, BLACK)
@@ -186,9 +178,7 @@ class Game:
     def player_hit(self):
         if not self.player.invulnerable:
             self.player.hit()
-            explosion = Explosion(self.player.rect.center)
-            self.explosions.add(explosion)
-            self.all_sprites.add(explosion)
+            self.create_explosion_particles(self.player.rect.center)
             play_sound(self.sounds['explosion'])
             
             if self.score > self.highscore:
@@ -220,22 +210,31 @@ class Game:
             print("Cannot shoot when game is over")  # Debug print
 
     def asteroid_explosion(self, asteroid):
-        explosion = Explosion(asteroid.rect.center)
-        self.explosions.add(explosion)
-        self.all_sprites.add(explosion)
+        self.create_explosion_particles(asteroid.rect.center)
         play_sound(self.sounds['explosion'])
-        for _ in range(20):
-            particle = Particle(asteroid.rect.center, (150, 150, 150))
-            self.particles.add(particle)
 
     def ufo_explosion(self, ufo):
-        explosion = Explosion(ufo.rect.center)
-        self.explosions.add(explosion)
-        self.all_sprites.add(explosion)
+        self.create_explosion_particles(ufo.rect.center)
         play_sound(self.sounds['explosion'])
-        for _ in range(20):
-            particle = Particle(ufo.rect.center, (255, 0, 0))
+
+    def create_explosion_particles(self, position):
+        colors = [(255, 165, 0), (255, 69, 0), (255, 215, 0)]  # Orange, Red-Orange, Gold
+        num_particles = random.randint(30, 50)
+        
+        for _ in range(num_particles):
+            color = random.choice(colors)
+            size = random.randint(2, 5)
+            speed = random.uniform(1, 4)
+            lifetime = random.randint(30, 90)
+            
+            particle = Particle(position, color, size, speed, lifetime)
             self.particles.add(particle)
+            self.all_sprites.add(particle)
+
+        # Add a central, larger explosion particle
+        central_particle = Particle(position, (255, 255, 255), 8, 0.5, 45)
+        self.particles.add(central_particle)
+        self.all_sprites.add(central_particle)
 
     def spawn_asteroids(self):
         for _ in range(self.num_asteroids):
