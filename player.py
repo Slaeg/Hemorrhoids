@@ -66,6 +66,9 @@ class Player(pygame.sprite.Sprite):
     def respawn(self):
         self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         self.velocity = pygame.math.Vector2(0, 0)
+        self.start_invulnerability()
+
+    def start_invulnerability(self):
         self.invulnerable = True
         self.invulnerable_timer = self.invulnerable_duration
         self.visible = True

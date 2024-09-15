@@ -6,6 +6,7 @@ from asteroid import Asteroid
 from ufo import UFO
 from ufo_bullet import UFOBullet
 from particle import Particle
+from player import Player
 
 class Game:
     instance = None
@@ -26,16 +27,16 @@ class Game:
             'ufo': load_sound('assets/sounds/ufo.wav'),
             'ufo_shoot': load_sound('assets/sounds/ufo_shoot.wav'),
         }
-        self.initialize_game()
         self.state = "TITLE"  # New game state
         self.title_font = pygame.font.Font("assets/fonts/Layn.ttf", 64)  # Larger font for title
         self.info_font = pygame.font.Font("assets/fonts/Layn.ttf", 24)  
         self.game_over_delay = 2 * FPS  # 2 seconds delay at 60 FPS
         self.game_over_timer = 0
+        self.initialize_game()
 
     def initialize_game(self):
-        from player import Player  # Import Player here to avoid circular import
         self.player = Player()
+        self.player.start_invulnerability()  # Start with invulnerability
         self.level = 1
         self.num_asteroids = 4  # Start with 4 big asteroids
         self.asteroids = pygame.sprite.Group()
@@ -71,6 +72,10 @@ class Game:
                     self.reset_game()
                     self.state = "PLAYING"
         return True
+
+    def reset_game(self):
+        self.highscore = max(self.score, self.highscore)  # Update highscore before resetting
+        self.initialize_game()
 
     def update(self):
         if self.state == "PLAYING":
