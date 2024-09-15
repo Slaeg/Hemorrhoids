@@ -22,6 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.invulnerable_duration = 180  # 3 seconds at 60 FPS
         self.flash_interval = 5  # Flash every 1/4 second at 60 FPS
         self.visible = True
+        self.death_position = None
 
     def update(self):
         if self.respawn_timer > 0:
@@ -58,6 +59,7 @@ class Player(pygame.sprite.Sprite):
     def hit(self):
         if not self.invulnerable:
             self.lives -= 1
+            self.death_position = self.rect.center  # Store the death position
             if self.lives > 0:
                 self.respawn()
             else:

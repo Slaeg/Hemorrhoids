@@ -47,7 +47,7 @@ class Game:
         
         self.score = 0
         self.ufo_timer = 0
-        self.ufo_interval = 5 * 60  # UFO appears every 5 seconds at 60 FPS
+        self.ufo_interval = 10 * 60  # UFO appears every 5 seconds at 60 FPS
         self.game_over = False
 
 
@@ -114,7 +114,7 @@ class Game:
             score_text = self.font.render(f"Score: {self.score}", True, BLACK)
             highscore_text = self.font.render(f"Highscore: {self.highscore}", True, BLACK)
             lives_text = self.font.render(f"Lives: {self.player.lives}", True, BLACK)
-            self.screen.blit(score_text, (SCREEN_WIDTH - 150, 10))
+            self.screen.blit(score_text, (SCREEN_WIDTH - 250, 10))
             self.screen.blit(highscore_text, (10, 10))
             self.screen.blit(lives_text, (10, 50))
         elif self.state == "GAME_OVER":
@@ -204,19 +204,20 @@ class Game:
     def player_hit(self):
         if not self.player.invulnerable:
             self.player.hit()
-            self.create_explosion_particles(self.player.rect.center)
+            if self.player.death_position:
+                self.create_explosion_particles(self.player.death_position)
+                self.player.death_position = None  # Reset death position after using it
             play_sound(self.sounds['explosion'])
             
             if self.score > self.highscore:
                 self.highscore = self.score
             
-            if self.player.lives > 0:
-                self.player.respawn()
-            else:
+            if self.player.lives <= 0:
                 print("Game over")  # Debug print
                 self.game_over = True
                 self.game_over_timer = 0  # Start the game over delay timer
                 self.player.kill()  # Remove the player sprite
+
 
     def handle_ufo_fire(self):
         for ufo in self.ufos:
