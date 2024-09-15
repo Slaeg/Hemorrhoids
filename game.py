@@ -1,6 +1,6 @@
 import pygame
 import random
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE, FPS
 from utils import load_sound, play_sound
 from asteroid import Asteroid
 from ufo import UFO
@@ -10,9 +10,13 @@ from particle import Particle
 class Game:
     instance = None
 
-    def __init__(self, screen):
-        if Game.instance is None:
-            Game.instance = self
+    def __new__(cls, screen):
+        if cls.instance is None:
+            cls.instance = super(Game, cls).__new__(cls)
+            cls.instance.initialize(screen)
+        return cls.instance
+
+    def initialize(self, screen):
         self.screen = screen
         self.highscore = 0
         self.font = pygame.font.Font("assets/fonts/Layn.ttf", 16)  # Load custom font
@@ -26,6 +30,8 @@ class Game:
         self.state = "TITLE"  # New game state
         self.title_font = pygame.font.Font("assets/fonts/Layn.ttf", 64)  # Larger font for title
         self.info_font = pygame.font.Font("assets/fonts/Layn.ttf", 24)  
+        self.game_over_delay = 2 * FPS  # 2 seconds delay at 60 FPS
+        self.game_over_timer = 0
 
     def initialize_game(self):
         from player import Player  # Import Player here to avoid circular import
@@ -82,18 +88,24 @@ class Game:
                     self.spawn_ufo()
                     self.ufo_timer = 0
             else:
-                self.state = "GAME_OVER"
+                # Update particles during the delay
+                self.particles.update()
+                
+                self.game_over_timer += 1
+                if self.game_over_timer >= self.game_over_delay:
+                    self.state = "GAME_OVER"
 
     def draw(self):
         self.screen.fill(WHITE)
         
         if self.state == "TITLE":
             self.draw_title_screen()
-        elif self.state == "PLAYING":
+        elif self.state == "PLAYING" or (self.game_over and self.game_over_timer < self.game_over_delay):
             for sprite in self.all_sprites:
                 if sprite != self.player:
                     self.screen.blit(sprite.image, sprite.rect)
-            self.player.draw(self.screen)  # Draw player separately
+            if not self.game_over:
+                self.player.draw(self.screen)  # Draw player separately
             self.player.bullets.draw(self.screen)
             self.ufo_bullets.draw(self.screen)
             self.particles.draw(self.screen)
@@ -189,6 +201,8 @@ class Game:
             else:
                 print("Game over")  # Debug print
                 self.game_over = True
+                self.game_over_timer = 0  # Start the game over delay timer
+                self.player.kill()  # Remove the player sprite
 
     def handle_ufo_fire(self):
         for ufo in self.ufos:
