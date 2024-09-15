@@ -1,5 +1,6 @@
 import pygame
 import random
+import math
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 class Asteroid(pygame.sprite.Sprite):
@@ -7,17 +8,19 @@ class Asteroid(pygame.sprite.Sprite):
     MEDIUM_SIZE = 30
     SMALL_SIZE = 15
 
-    def __init__(self, x=None, y=None, size=LARGE_SIZE, speed=None, split_count=0):
+    def __init__(self, x=None, y=None, size=LARGE_SIZE, speed=None):
         super().__init__()
         self.size = size
-        self.split_count = split_count
         
         if self.size == self.LARGE_SIZE:
             self.image = pygame.image.load("assets/images/asteroid_large.png").convert_alpha()
+            self.base_speed = 1
         elif self.size == self.MEDIUM_SIZE:
             self.image = pygame.image.load("assets/images/asteroid_medium.png").convert_alpha()
+            self.base_speed = 1.5
         elif self.size == self.SMALL_SIZE:
             self.image = pygame.image.load("assets/images/asteroid_small.png").convert_alpha()
+            self.base_speed = 2
 
         self.image = pygame.transform.scale(self.image, (self.size, self.size))
         self.rect = self.image.get_rect()
@@ -30,12 +33,14 @@ class Asteroid(pygame.sprite.Sprite):
             self.rect.x = x
             self.rect.y = y
         
-        self.speed = speed if speed is not None else random.uniform(0.5, 1.5)
-        self.velocity = pygame.math.Vector2(random.choice([-1, 1]) * self.speed, random.choice([-1, 1]) * self.speed)
-    
+        self.speed = speed if speed is not None else self.base_speed * random.uniform(0.8, 1.2)
+        angle = random.uniform(0, 2 * math.pi)
+        self.velocity = pygame.math.Vector2(math.cos(angle), math.sin(angle)) * self.speed
+
     def update(self):
-        self.rect.x += self.velocity.x
-        self.rect.y += self.velocity.y
+        movement = self.velocity.normalize() * self.speed
+        self.rect.x += movement.x
+        self.rect.y += movement.y
         self.wrap_around_screen()
 
     def wrap_around_screen(self):
@@ -49,11 +54,18 @@ class Asteroid(pygame.sprite.Sprite):
             self.rect.bottom = 0
 
     def split(self):
-        if self.size > self.SMALL_SIZE and self.split_count < 2:
+        if self.size > self.SMALL_SIZE:
             new_size = self.size // 2
-            new_speed = self.speed + 1
-            child1 = Asteroid(self.rect.x, self.rect.y, new_size, new_speed, self.split_count + 1)
-            child2 = Asteroid(self.rect.x, self.rect.y, new_size, new_speed, self.split_count + 1)
+            new_speed = self.speed * 1.9  # Increase speed
+            angle1 = random.uniform(0, 2 * math.pi)
+            angle2 = angle1 + math.pi  # Opposite direction
+            
+            child1 = Asteroid(self.rect.centerx, self.rect.centery, new_size, new_speed)
+            child2 = Asteroid(self.rect.centerx, self.rect.centery, new_size, new_speed)
+            
+            child1.velocity = pygame.math.Vector2(math.cos(angle1), math.sin(angle1)) * new_speed
+            child2.velocity = pygame.math.Vector2(math.cos(angle2), math.sin(angle2)) * new_speed
+            
             return [child1, child2]
         else:
             return []

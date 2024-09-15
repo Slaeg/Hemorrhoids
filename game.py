@@ -18,26 +18,28 @@ class Game:
         return cls.instance
 
     def initialize(self, screen):
+        """Initialize game state and resources."""
         self.screen = screen
         self.highscore = 0
         self.font_filename = "assets/fonts/Layn.ttf"
-        self.font = pygame.font.Font(self.font_filename, 16)  # Load custom font
+        self.font = pygame.font.Font(self.font_filename, 16)
         self.sounds = {
             'shoot': load_sound('assets/sounds/shoot.wav'),
             'explosion': load_sound('assets/sounds/explosion.wav'),
             'ufo': load_sound('assets/sounds/ufo.wav'),
             'ufo_shoot': load_sound('assets/sounds/ufo_shoot.wav'),
         }
-        self.state = "TITLE"  # New game state
+        self.state = "TITLE"
         self.game_over_delay = 2 * FPS  # 2 seconds delay at 60 FPS
         self.game_over_timer = 0
         self.initialize_game()
 
     def initialize_game(self):
+        """Set up initial game state."""
         self.player = Player()
-        self.player.start_invulnerability()  # Start with invulnerability
+        self.player.start_invulnerability()
         self.level = 1
-        self.num_asteroids = 4  # Start with 4 big asteroids
+        self.num_asteroids = 4
         self.asteroids = pygame.sprite.Group()
         self.ufos = pygame.sprite.Group()
         self.ufo_bullets = pygame.sprite.Group()
@@ -47,11 +49,11 @@ class Game:
         
         self.score = 0
         self.ufo_timer = 0
-        self.ufo_interval = 10 * 60  # UFO appears every 5 seconds at 60 FPS
+        self.ufo_interval = 10 * 60  # UFO appears every 10 seconds at 60 FPS
         self.game_over = False
 
-
     def handle_events(self):
+        """Process game events."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -63,16 +65,17 @@ class Game:
                     if event.key == pygame.K_SPACE:
                         self.player_shoot()
                 elif self.state == "GAME_OVER" and event.key == pygame.K_r:
-                    print("R key pressed, resetting game")
                     self.reset_game()
                     self.state = "PLAYING"
         return True
 
     def reset_game(self):
-        self.highscore = max(self.score, self.highscore)  # Update highscore before resetting
+        """Reset the game state for a new game."""
+        self.highscore = max(self.score, self.highscore)
         self.initialize_game()
 
     def update(self):
+        """Update game state."""
         if self.state == "PLAYING":
             if not self.game_over:
                 self.all_sprites.update()
@@ -88,7 +91,6 @@ class Game:
                     self.spawn_ufo()
                     self.ufo_timer = 0
             else:
-                # Update particles during the delay
                 self.particles.update()
                 
                 self.game_over_timer += 1
@@ -96,6 +98,7 @@ class Game:
                     self.state = "GAME_OVER"
 
     def draw(self):
+        """Render the game state to the screen."""
         self.screen.fill(WHITE)
         
         if self.state == "TITLE":
@@ -105,24 +108,19 @@ class Game:
                 if sprite != self.player:
                     self.screen.blit(sprite.image, sprite.rect)
             if not self.game_over:
-                self.player.draw(self.screen)  # Draw player separately
+                self.player.draw(self.screen)
             self.player.bullets.draw(self.screen)
             self.ufo_bullets.draw(self.screen)
             self.particles.draw(self.screen)
             
-            # Display the score, highscore, and lives
-            score_text = self.font.render(f"Score: {self.score}", True, BLACK)
-            highscore_text = self.font.render(f"Highscore: {self.highscore}", True, BLACK)
-            lives_text = self.font.render(f"Lives: {self.player.lives}", True, BLACK)
-            self.screen.blit(score_text, (SCREEN_WIDTH - 250, 10))
-            self.screen.blit(highscore_text, (10, 10))
-            self.screen.blit(lives_text, (10, 50))
+            self.draw_hud()
         elif self.state == "GAME_OVER":
             self.draw_game_over()
         
         pygame.display.flip()
     
     def draw_title_screen(self):
+        """Draw the title screen."""
         title_font = pygame.font.Font(self.font_filename, 64)
         title_text = title_font.render("Haemorrhoids", True, BLACK)
         start_text = self.font.render("Press SPACE to start", True, BLACK)
@@ -143,9 +141,10 @@ class Game:
         self.screen.blit(controls_text3, controls_rect3)
 
     def draw_game_over(self):
-        self.screen.fill(WHITE)  # Clear the screen with a white background
+        """Draw the game over screen."""
+        self.screen.fill(WHITE)
 
-        game_over_font = pygame.font.Font(self.font_filename, 64)  # Larger font for "GAME OVER"
+        game_over_font = pygame.font.Font(self.font_filename, 64)
         game_over_text = game_over_font.render("GAME OVER", True, BLACK)
         score_text = self.font.render(f"Score: {self.score}", True, BLACK)
         highscore_text = self.font.render(f"Highscore: {self.highscore}", True, BLACK)
@@ -161,8 +160,27 @@ class Game:
         self.screen.blit(highscore_text, highscore_rect)
         self.screen.blit(restart_text, restart_rect)
 
+    def draw_hud(self):
+        """Draw the heads-up display (score, highscore, lives)."""
+        score_text = self.font.render(f"Score: {self.score}", True, BLACK)
+        highscore_text = self.font.render(f"Highscore: {self.highscore}", True, BLACK)
+        lives_text = self.font.render(f"Lives: {self.player.lives}", True, BLACK)
+        self.screen.blit(score_text, (SCREEN_WIDTH - 250, 10))
+        self.screen.blit(highscore_text, (10, 10))
+        self.screen.blit(lives_text, (10, 50))
+
     def handle_collisions(self):
-        # Player bullets with asteroids
+        """Handle collisions between game objects."""
+        self.handle_bullet_asteroid_collisions()
+        self.handle_bullet_ufo_collisions()
+        self.handle_ufo_bullet_player_collision()
+        self.handle_player_object_collisions()
+
+        if not self.asteroids:
+            self.level_up()
+
+    def handle_bullet_asteroid_collisions(self):
+        """Handle collisions between player bullets and asteroids."""
         hits = pygame.sprite.groupcollide(self.player.bullets, self.asteroids, True, True, pygame.sprite.collide_mask)
         for bullet, hit_asteroids in hits.items():
             for asteroid in hit_asteroids:
@@ -170,56 +188,61 @@ class Game:
                 new_asteroids = asteroid.split()
                 self.asteroids.add(new_asteroids)
                 self.all_sprites.add(new_asteroids)
-                
-                # Update score based on asteroid size
-                if asteroid.size == 60:
-                    self.score += 20
-                elif asteroid.size == 30:
-                    self.score += 50
-                elif asteroid.size == 15:
-                    self.score += 100
-        
-        # Player bullets with UFOs
+                self.update_score(asteroid.size)
+
+    def handle_bullet_ufo_collisions(self):
+        """Handle collisions between player bullets and UFOs."""
         ufo_hits = pygame.sprite.groupcollide(self.player.bullets, self.ufos, True, True, pygame.sprite.collide_mask)
         for bullet, hit_ufos in ufo_hits.items():
             for ufo in hit_ufos:
                 self.score += ufo.points
                 self.ufo_explosion(ufo)
-                self.ufo_timer = 0  # Reset the timer to spawn a new UFO after the current one is destroyed
-        
-        # UFO bullets with player
+                self.ufo_timer = 0
+
+    def handle_ufo_bullet_player_collision(self):
+        """Handle collisions between UFO bullets and the player."""
         if pygame.sprite.spritecollideany(self.player, self.ufo_bullets, pygame.sprite.collide_mask):
             self.player_hit()
 
-        # Player with asteroids or UFOs
+    def handle_player_object_collisions(self):
+        """Handle collisions between the player and asteroids or UFOs."""
         if (pygame.sprite.spritecollide(self.player, self.asteroids, False, pygame.sprite.collide_mask) or 
             pygame.sprite.spritecollide(self.player, self.ufos, False, pygame.sprite.collide_mask)):
             self.player_hit()
 
-        if not self.asteroids:  # Check if all asteroids are cleared
-            self.level += 1
-            self.num_asteroids += 1  # Increase the number of asteroids for the next level
-            self.spawn_asteroids()
+    def level_up(self):
+        """Increase difficulty and spawn new asteroids."""
+        self.level += 1
+        self.num_asteroids += 1
+        self.spawn_asteroids()
+
+    def update_score(self, asteroid_size):
+        """Update the score based on the size of the destroyed asteroid."""
+        if asteroid_size == 60:
+            self.score += 20
+        elif asteroid_size == 30:
+            self.score += 50
+        elif asteroid_size == 15:
+            self.score += 100
 
     def player_hit(self):
+        """Handle player being hit by an asteroid, UFO, or UFO bullet."""
         if not self.player.invulnerable:
             self.player.hit()
             if self.player.death_position:
                 self.create_explosion_particles(self.player.death_position)
-                self.player.death_position = None  # Reset death position after using it
+                self.player.death_position = None
             play_sound(self.sounds['explosion'])
             
-            if self.score > self.highscore:
-                self.highscore = self.score
+            self.highscore = max(self.score, self.highscore)
             
             if self.player.lives <= 0:
-                print("Game over")  # Debug print
                 self.game_over = True
-                self.game_over_timer = 0  # Start the game over delay timer
-                self.player.kill()  # Remove the player sprite
-
+                self.game_over_timer = 0
+                self.player.kill()
 
     def handle_ufo_fire(self):
+        """Handle UFO firing bullets."""
         for ufo in self.ufos:
             bullet = ufo.fire(self.player.rect.center)
             if bullet:
@@ -227,24 +250,24 @@ class Game:
                 self.ufo_bullets.add(bullet)
 
     def player_shoot(self):
-        if not self.game_over:  # Only allow shooting if the game is not over
-            if self.sounds['shoot']:
-                play_sound(self.sounds['shoot'])
-            else:
-                print("Warning: Shoot sound not loaded")
+        """Handle player shooting."""
+        if not self.game_over:
+            play_sound(self.sounds['shoot'])
             self.player.fire()
-        
 
     def asteroid_explosion(self, asteroid):
+        """Create explosion effect for destroyed asteroid."""
         self.create_explosion_particles(asteroid.rect.center)
         play_sound(self.sounds['explosion'])
 
     def ufo_explosion(self, ufo):
+        """Create explosion effect for destroyed UFO."""
         self.create_explosion_particles(ufo.rect.center)
         play_sound(self.sounds['explosion'])
 
     def create_explosion_particles(self, position):
-        colors = [(255, 165, 0), (255, 69, 0), (255, 215, 0)]  # Orange, Red-Orange, Gold
+        """Create particle effect for explosions."""
+        colors = [(255, 165, 0), (255, 69, 0), (255, 215, 0)]
         num_particles = random.randint(30, 50)
         
         for _ in range(num_particles):
@@ -257,24 +280,26 @@ class Game:
             self.particles.add(particle)
             self.all_sprites.add(particle)
 
-        # Add a central, larger explosion particle
         central_particle = Particle(position, (255, 255, 255), 8, 0.5, 45)
         self.particles.add(central_particle)
         self.all_sprites.add(central_particle)
 
     def spawn_asteroids(self):
+        """Spawn asteroids at the start of a level."""
         for _ in range(self.num_asteroids):
             asteroid = Asteroid(size=60)
             self.asteroids.add(asteroid)
             self.all_sprites.add(asteroid)
 
     def spawn_ufo(self):
-        if len(self.ufos) == 0:  # Ensure only one UFO at a time
-            size = UFO.BIG_SIZE if random.random() < 0.7 else UFO.SMALL_SIZE  # 70% chance for big UFO
+        """Spawn a UFO."""
+        if len(self.ufos) == 0:
+            size = UFO.BIG_SIZE if random.random() < 0.7 else UFO.SMALL_SIZE
             ufo = UFO(size, self.sounds['ufo_shoot'])
             self.ufos.add(ufo)
             self.all_sprites.add(ufo)
             play_sound(self.sounds['ufo'])
 
     def add_particle(self, particle):
+        """Add a particle to the game."""
         self.particles.add(particle)

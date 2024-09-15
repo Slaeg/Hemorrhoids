@@ -17,7 +17,6 @@ def load_sound(file):
         return None
 
 def play_sound(sound):
-    print(f"play_sound called with sound object: {sound}")  # Debug print
     if sound:
         sound.play()
     else:
