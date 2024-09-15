@@ -5,12 +5,12 @@ Haemorrhoids is an Asteroids clone created as a learning project to explore Pyga
 ## Features
 
 - Classic Asteroids-style gameplay
-- Player spaceship with thrust and rotation controls
+- Player ship with thrust and rotation controls
 - Destructible haemorrhoids that split into smaller pieces
-- UFO enemies that shoot at the player
+- Enemies that shoot at the player
 - Scoring system and high score tracking
 - Multiple lives and respawn mechanics
-- Sound effects and background music
+- Retro sound effects and a dark ambient soundtrack
 - Particle effects for explosions
 
 ## Technologies Used
@@ -21,6 +21,7 @@ Haemorrhoids is an Asteroids clone created as a learning project to explore Pyga
 ## Installation
 
 1. Ensure you have Python installed on your system.
+
 2. Install Pygame by running:
    ```
    pip install pygame
@@ -44,8 +45,8 @@ Haemorrhoids is an Asteroids clone created as a learning project to explore Pyga
    - Up Arrow: Thrust
    - Left/Right Arrows: Rotate
 3. Press the Spacebar to shoot
-4. Destroy asteroids and UFOs to score points
-5. Avoid collisions with asteroids and UFO bullets
+4. Destroy haemorrhoids and enemys to score points
+5. Avoid collisions with haemorrhoids and enemy bullets
 
 ## Learning Outcomes
 
