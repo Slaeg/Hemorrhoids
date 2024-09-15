@@ -31,7 +31,7 @@ Haemorrhoids is an Asteroids clone created as a learning project to explore Pyga
    ```
 4. Navigate to the project directory:
    ```
-   cd haemorrhoids
+   cd Haemorrhoids
    ```
 
 ## How to Play
