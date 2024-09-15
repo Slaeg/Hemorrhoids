@@ -20,7 +20,8 @@ class Game:
     def initialize(self, screen):
         self.screen = screen
         self.highscore = 0
-        self.font = pygame.font.Font("assets/fonts/Layn.ttf", 16)  # Load custom font
+        self.font_filename = "assets/fonts/Layn.ttf"
+        self.font = pygame.font.Font(self.font_filename, 16)  # Load custom font
         self.sounds = {
             'shoot': load_sound('assets/sounds/shoot.wav'),
             'explosion': load_sound('assets/sounds/explosion.wav'),
@@ -28,8 +29,6 @@ class Game:
             'ufo_shoot': load_sound('assets/sounds/ufo_shoot.wav'),
         }
         self.state = "TITLE"  # New game state
-        self.title_font = pygame.font.Font("assets/fonts/Layn.ttf", 64)  # Larger font for title
-        self.info_font = pygame.font.Font("assets/fonts/Layn.ttf", 24)  
         self.game_over_delay = 2 * FPS  # 2 seconds delay at 60 FPS
         self.game_over_timer = 0
         self.initialize_game()
@@ -51,10 +50,6 @@ class Game:
         self.ufo_interval = 5 * 60  # UFO appears every 5 seconds at 60 FPS
         self.game_over = False
 
-    def reset_game(self):
-        print("Resetting game")  # Debug print
-        self.highscore = max(self.score, self.highscore)  # Update highscore before resetting
-        self.initialize_game()
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -128,11 +123,12 @@ class Game:
         pygame.display.flip()
     
     def draw_title_screen(self):
-        title_text = self.title_font.render("Haemorrhoids", True, BLACK)
-        start_text = self.info_font.render("Press SPACE to start", True, BLACK)
-        controls_text1 = self.info_font.render("Controls:", True, BLACK)
-        controls_text2 = self.info_font.render("Arrow keys to move", True, BLACK)
-        controls_text3 = self.info_font.render("SPACE to shoot", True, BLACK)
+        title_font = pygame.font.Font(self.font_filename, 64)
+        title_text = title_font.render("Haemorrhoids", True, BLACK)
+        start_text = self.font.render("Press SPACE to start", True, BLACK)
+        controls_text1 = self.font.render("Controls:", True, BLACK)
+        controls_text2 = self.font.render("Arrow keys to move", True, BLACK)
+        controls_text3 = self.font.render("SPACE to shoot", True, BLACK)
 
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 4))
         start_rect = start_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
@@ -147,10 +143,23 @@ class Game:
         self.screen.blit(controls_text3, controls_rect3)
 
     def draw_game_over(self):
-        game_over_text = self.font.render("GAME OVER", True, BLACK)
+        self.screen.fill(WHITE)  # Clear the screen with a white background
+
+        game_over_font = pygame.font.Font(self.font_filename, 64)  # Larger font for "GAME OVER"
+        game_over_text = game_over_font.render("GAME OVER", True, BLACK)
+        score_text = self.font.render(f"Score: {self.score}", True, BLACK)
+        highscore_text = self.font.render(f"Highscore: {self.highscore}", True, BLACK)
         restart_text = self.font.render("Press R to Restart", True, BLACK)
-        self.screen.blit(game_over_text, (SCREEN_WIDTH // 2 - game_over_text.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
-        self.screen.blit(restart_text, (SCREEN_WIDTH // 2 - restart_text.get_width() // 2, SCREEN_HEIGHT // 2 + 50))
+
+        game_over_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 100))
+        score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+        highscore_rect = highscore_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
+        restart_rect = restart_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+
+        self.screen.blit(game_over_text, game_over_rect)
+        self.screen.blit(score_text, score_rect)
+        self.screen.blit(highscore_text, highscore_rect)
+        self.screen.blit(restart_text, restart_rect)
 
     def handle_collisions(self):
         # Player bullets with asteroids
