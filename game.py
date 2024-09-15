@@ -228,15 +228,12 @@ class Game:
 
     def player_shoot(self):
         if not self.game_over:  # Only allow shooting if the game is not over
-            print("player_shoot method called")  # Debug print
             if self.sounds['shoot']:
-                print("Attempting to play shoot sound")  # Debug print
                 play_sound(self.sounds['shoot'])
             else:
                 print("Warning: Shoot sound not loaded")
             self.player.fire()
-        else:
-            print("Cannot shoot when game is over")  # Debug print
+        
 
     def asteroid_explosion(self, asteroid):
         self.create_explosion_particles(asteroid.rect.center)
