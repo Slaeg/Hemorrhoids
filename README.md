@@ -27,7 +27,7 @@ Haemorrhoids is an Asteroids clone created as a learning project to explore Pyga
    ```
 3. Clone this repository:
    ```
-   git clone https://github.com/yourusername/haemorrhoids.git
+   git clone https://github.com/Slaeg/Haemorrhoids.git
    ```
 4. Navigate to the project directory:
    ```
