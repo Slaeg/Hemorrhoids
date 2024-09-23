@@ -32,6 +32,8 @@ class Game:
         self.state = "TITLE"
         self.game_over_delay = 2 * FPS  # 2 seconds delay at 60 FPS
         self.game_over_timer = 0
+        self.background = pygame.image.load("assets/images/background1.png").convert()
+        self.background = pygame.transform.scale(self.background, (SCREEN_WIDTH, SCREEN_HEIGHT))
         self.initialize_game()
 
     def initialize_game(self):
@@ -99,11 +101,11 @@ class Game:
 
     def draw(self):
         """Render the game state to the screen."""
-        self.screen.fill(WHITE)
-        
         if self.state == "TITLE":
+            self.screen.fill(WHITE)
             self.draw_title_screen()
         elif self.state == "PLAYING" or (self.game_over and self.game_over_timer < self.game_over_delay):
+            self.screen.blit(self.background, (0, 0))
             for sprite in self.all_sprites:
                 if sprite != self.player:
                     self.screen.blit(sprite.image, sprite.rect)
@@ -115,9 +117,11 @@ class Game:
             
             self.draw_hud()
         elif self.state == "GAME_OVER":
+            self.screen.fill(WHITE)
             self.draw_game_over()
         
         pygame.display.flip()
+
     
     def draw_title_screen(self):
         """Draw the title screen."""
