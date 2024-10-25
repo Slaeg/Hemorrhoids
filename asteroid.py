@@ -4,11 +4,34 @@ import math
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 
 class Asteroid(pygame.sprite.Sprite):
+    """
+    A class representing an asteroid in the game.
+
+    Attributes:
+        LARGE_SIZE (int): The size of a large asteroid.
+        MEDIUM_SIZE (int): The size of a medium asteroid.
+        SMALL_SIZE (int): The size of a small asteroid.
+        size (int): The size of the asteroid.
+        image (pygame.Surface): The image of the asteroid.
+        rect (pygame.Rect): The rectangle representing the asteroid's position.
+        mask (pygame.Mask): The mask for collision detection.
+        speed (float): The speed of the asteroid.
+        velocity (pygame.math.Vector2): The velocity vector of the asteroid.
+    """
     LARGE_SIZE = 60
     MEDIUM_SIZE = 30
     SMALL_SIZE = 15
 
     def __init__(self, x=None, y=None, size=LARGE_SIZE, speed=None):
+        """
+        Initialize an asteroid.
+
+        Args:
+            x (int, optional): The x-coordinate of the asteroid. Defaults to None.
+            y (int, optional): The y-coordinate of the asteroid. Defaults to None.
+            size (int, optional): The size of the asteroid. Defaults to LARGE_SIZE.
+            speed (float, optional): The speed of the asteroid. Defaults to None.
+        """
         super().__init__()
         self.size = size
         
@@ -36,14 +59,20 @@ class Asteroid(pygame.sprite.Sprite):
         self.speed = speed if speed is not None else self.base_speed * random.uniform(0.8, 1.2)
         angle = random.uniform(0, 2 * math.pi)
         self.velocity = pygame.math.Vector2(math.cos(angle), math.sin(angle)) * self.speed
+        self.movement_vector = self.velocity.normalize() * self.speed
 
     def update(self):
-        movement = self.velocity.normalize() * self.speed
-        self.rect.x += movement.x
-        self.rect.y += movement.y
+        """
+        Update the asteroid's position and handle screen wrapping.
+        """
+        self.rect.x += self.movement_vector.x
+        self.rect.y += self.movement_vector.y
         self.wrap_around_screen()
 
     def wrap_around_screen(self):
+        """
+        Wrap the asteroid around the screen edges.
+        """
         if self.rect.right < 0:
             self.rect.left = SCREEN_WIDTH
         elif self.rect.left > SCREEN_WIDTH:
@@ -54,6 +83,12 @@ class Asteroid(pygame.sprite.Sprite):
             self.rect.bottom = 0
 
     def split(self):
+        """
+        Split the asteroid into smaller asteroids.
+
+        Returns:
+            list: A list of new smaller asteroids.
+        """
         if self.size > self.SMALL_SIZE:
             new_size = self.size // 2
             new_speed = self.speed * 1.9  # Increase speed

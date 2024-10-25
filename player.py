@@ -4,7 +4,35 @@ from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 from bullet import Bullet
 
 class Player(pygame.sprite.Sprite):
+    """
+    A class representing the player in the game.
+
+    Attributes:
+        original_image (pygame.Surface): The original image of the player.
+        image (pygame.Surface): The current image of the player.
+        rect (pygame.Rect): The rectangle representing the player's position.
+        mask (pygame.Mask): The mask for collision detection.
+        angle (float): The angle of the player's rotation.
+        rotation_speed (float): The speed of the player's rotation.
+        velocity (pygame.math.Vector2): The velocity vector of the player.
+        bullets (pygame.sprite.Group): The group of bullets fired by the player.
+        lives (int): The number of lives the player has.
+        respawn_timer (int): The timer for respawning the player.
+        respawn_delay (int): The delay before the player can respawn.
+        invulnerable (bool): Whether the player is invulnerable.
+        invulnerable_timer (int): The timer for the player's invulnerability.
+        invulnerable_duration (int): The duration of the player's invulnerability.
+        flash_interval (int): The interval for flashing the player during invulnerability.
+        visible (bool): Whether the player is visible.
+        death_position (tuple): The position where the player died.
+    """
     def __init__(self):
+        """
+        Initialize the player.
+
+        Args:
+            None
+        """
         super().__init__()
         self.original_image = pygame.image.load("assets/images/player.png").convert_alpha()
         self.image = pygame.transform.scale(self.original_image, (25, 25))
@@ -25,6 +53,9 @@ class Player(pygame.sprite.Sprite):
         self.death_position = None
 
     def update(self):
+        """
+        Update the player's state.
+        """
         if self.respawn_timer > 0:
             self.respawn_timer -= 1
             return
@@ -57,6 +88,9 @@ class Player(pygame.sprite.Sprite):
         self.wrap_around_screen()
 
     def hit(self):
+        """
+        Handle the player being hit by an asteroid, UFO, or UFO bullet.
+        """
         if not self.invulnerable:
             self.lives -= 1
             self.death_position = self.rect.center  # Store the death position
@@ -66,25 +100,40 @@ class Player(pygame.sprite.Sprite):
                 self.kill()
 
     def respawn(self):
+        """
+        Respawn the player at the center of the screen.
+        """
         self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
         self.velocity = pygame.math.Vector2(0, 0)
         self.start_invulnerability()
 
     def start_invulnerability(self):
+        """
+        Start the player's invulnerability period.
+        """
         self.invulnerable = True
         self.invulnerable_timer = self.invulnerable_duration
         self.visible = True
 
     def thrust(self):
+        """
+        Apply thrust to the player in the direction they are facing.
+        """
         radians = math.radians(self.angle)
         self.velocity.x += 0.5 * math.sin(radians)
         self.velocity.y -= 0.5 * math.cos(radians)
 
     def fire(self):
+        """
+        Fire a bullet from the player's current position and angle.
+        """
         bullet = Bullet(self.rect.center, self.angle)
         self.bullets.add(bullet)
 
     def wrap_around_screen(self):
+        """
+        Wrap the player around the screen edges.
+        """
         if self.rect.right < 0:
             self.rect.left = SCREEN_WIDTH
         elif self.rect.left > SCREEN_WIDTH:
@@ -95,5 +144,11 @@ class Player(pygame.sprite.Sprite):
             self.rect.bottom = 0
 
     def draw(self, surface):
+        """
+        Draw the player on the given surface.
+
+        Args:
+            surface (pygame.Surface): The surface to draw the player on.
+        """
         if self.visible:
             surface.blit(self.image, self.rect)
