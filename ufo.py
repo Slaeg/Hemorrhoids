@@ -5,6 +5,8 @@ from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 from ufo_bullet import UFOBullet
 
 class UFO(pygame.sprite.Sprite):
+    """A class representing a UFO in the game."""
+
     BIG_SIZE = 40
     SMALL_SIZE = 20
     BIG_SPEED = 1.5
@@ -13,6 +15,13 @@ class UFO(pygame.sprite.Sprite):
     SMALL_POINTS = 1000
 
     def __init__(self, size, shoot_sound):
+        """
+        Initialize a UFO.
+
+        Args:
+            size (int): The size of the UFO.
+            shoot_sound (pygame.mixer.Sound): The sound to play when the UFO shoots.
+        """
         super().__init__()
         self.size = size
         if self.size == self.BIG_SIZE:
@@ -39,6 +48,7 @@ class UFO(pygame.sprite.Sprite):
         self.shoot_sound = shoot_sound
     
     def update(self):
+        """Update the UFO's position."""
         self.rect.x += self.velocity.x
         if not self.direction_changed and ((self.start_side == 'left' and self.rect.centerx > SCREEN_WIDTH // 2) or (self.start_side == 'right' and self.rect.centerx < SCREEN_WIDTH // 2)):
             self.velocity.y = random.choice([-1, 1]) * self.speed

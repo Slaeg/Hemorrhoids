@@ -4,6 +4,9 @@ from game import Game
 from utils import play_music
 
 def main():
+    """
+    Main function to initialize and run the game.
+    """
     try:
         pygame.init()
         pygame.mixer.init()
