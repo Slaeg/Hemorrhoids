@@ -5,6 +5,27 @@ from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 from ufo_bullet import UFOBullet
 
 class UFO(pygame.sprite.Sprite):
+    """
+    A class representing a UFO in the game.
+
+    Attributes:
+        BIG_SIZE (int): The size of a big UFO.
+        SMALL_SIZE (int): The size of a small UFO.
+        BIG_SPEED (float): The speed of a big UFO.
+        SMALL_SPEED (float): The speed of a small UFO.
+        BIG_POINTS (int): The points awarded for destroying a big UFO.
+        SMALL_POINTS (int): The points awarded for destroying a small UFO.
+        size (int): The size of the UFO.
+        image (pygame.Surface): The image of the UFO.
+        rect (pygame.Rect): The rectangle representing the UFO's position.
+        mask (pygame.Mask): The mask for collision detection.
+        speed (float): The speed of the UFO.
+        points (int): The points awarded for destroying the UFO.
+        fire_probability (float): The probability of the UFO firing a bullet.
+        velocity (pygame.math.Vector2): The velocity vector of the UFO.
+        direction_changed (bool): Whether the UFO has changed direction.
+        shoot_sound (pygame.mixer.Sound): The sound played when the UFO fires a bullet.
+    """
     BIG_SIZE = 40
     SMALL_SIZE = 20
     BIG_SPEED = 1.5
@@ -13,6 +34,13 @@ class UFO(pygame.sprite.Sprite):
     SMALL_POINTS = 1000
 
     def __init__(self, size, shoot_sound):
+        """
+        Initialize a UFO.
+
+        Args:
+            size (int): The size of the UFO.
+            shoot_sound (pygame.mixer.Sound): The sound played when the UFO fires a bullet.
+        """
         super().__init__()
         self.size = size
         if self.size == self.BIG_SIZE:
@@ -39,6 +67,9 @@ class UFO(pygame.sprite.Sprite):
         self.shoot_sound = shoot_sound
     
     def update(self):
+        """
+        Update the UFO's position and handle screen wrapping.
+        """
         self.rect.x += self.velocity.x
         if not self.direction_changed and ((self.start_side == 'left' and self.rect.centerx > SCREEN_WIDTH // 2) or (self.start_side == 'right' and self.rect.centerx < SCREEN_WIDTH // 2)):
             self.velocity.y = random.choice([-1, 1]) * self.speed
@@ -59,6 +90,15 @@ class UFO(pygame.sprite.Sprite):
             self.rect.top = 0
 
     def fire(self, player_pos):
+        """
+        Fire a bullet at the player.
+
+        Args:
+            player_pos (tuple): The position of the player.
+
+        Returns:
+            UFOBullet: The fired bullet, or None if the UFO does not fire.
+        """
         if random.random() < self.fire_probability:
             if self.shoot_sound:
                 self.shoot_sound.play()
@@ -66,4 +106,13 @@ class UFO(pygame.sprite.Sprite):
         return None
 
     def get_angle_to_player(self, player_pos):
+        """
+        Calculate the angle to the player.
+
+        Args:
+            player_pos (tuple): The position of the player.
+
+        Returns:
+            float: The angle to the player in degrees.
+        """
         return (pygame.Vector2(player_pos) - pygame.Vector2(self.rect.center)).angle_to(pygame.Vector2(1, 0))
