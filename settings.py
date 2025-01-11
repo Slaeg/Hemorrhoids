@@ -6,3 +6,5 @@ FPS = 60
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
+# Sound settings
+SOUND_VOLUME = 0.2  # Volume level (0.0 to 1.0)

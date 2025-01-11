@@ -1,6 +1,6 @@
 import pygame
 import random
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE, FPS
+from settings import SCREEN_WIDTH, SCREEN_HEIGHT, BLACK, WHITE, FPS, SOUND_VOLUME
 from utils import load_sound, play_sound
 from asteroid import Asteroid
 from ufo import UFO
@@ -29,6 +29,9 @@ class Game:
             'ufo': load_sound('assets/sounds/ufo.wav'),
             'ufo_shoot': load_sound('assets/sounds/ufo_shoot.wav'),
         }
+        for sound in self.sounds.values():
+            sound.set_volume(SOUND_VOLUME)
+
         self.state = "TITLE"
         self.game_over_delay = 2 * FPS  # 2 seconds delay at 60 FPS
         self.game_over_timer = 0
